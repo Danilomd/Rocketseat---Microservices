@@ -1,6 +1,9 @@
+import '@opentelemetry/auto-instrumentations-node/register'
+import { setTimeout } from 'node:timers/promises'
 import { fastify } from 'fastify'
 import { randomUUID } from 'node:crypto'
 import { fastifyCors } from '@fastify/cors'
+import { trace } from '@opentelemetry/api'
 import { custom, z } from 'zod'
 import {
   serializerCompiler,
@@ -40,6 +43,17 @@ app.post('/orders', {
   //channels.orders.sendToQueue('orders', Buffer.from('Hello World!'))
 
   const orderId = randomUUID()
+
+
+  await db.insert(schema.orders).values({
+    id: randomUUID(),
+    customerId: 'asdasdasdads',
+    amount,
+  })
+
+  //await setTimeout(2000)
+  //trace.getActiveSpan()?.setAttribute('order_id', orderId)
+
   dispatchOrderCreated({
     orderId,
     amount,
@@ -48,11 +62,7 @@ app.post('/orders', {
     }
   })
 
-  await db.insert(schema.orders).values({
-    id: randomUUID(),
-    customerId: 'asdasdasdads',
-    amount,
-  })
+
   return reply.status(201).send()
 })
 
